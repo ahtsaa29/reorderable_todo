@@ -212,17 +212,19 @@ class _AddToDoState extends State<AddToDo> {
             ),
             ElevatedButton(
                 onPressed: () {
-                  DataStore().addItem(
-                    TodoModel(
-                      index: DataStore().items.length + 1,
-                      title: titleController!.text,
-                      detail: detailController!.text,
-                      dueDate: selectedDate!,
-                      createdAt: DateTime.now(),
-                      status: status.inProgress.toString(),
-                      key: Key(Xid().toString()),
-                    ),
+                  // DataStore().addItem(
+                  TodoModel todo = TodoModel(
+                    index: DataStore().items.length + 1,
+                    title: titleController!.text,
+                    detail: detailController!.text,
+                    dueDate: selectedDate!,
+                    createdAt: DateTime.now(),
+                    status: status.inProgress.toString(),
+                    key: Key(Xid().toString()),
                   );
+                  todo.save();
+                  // );
+
                   // log(DataStore().items.length.toString());
                 },
                 child: const Text("Save"))
