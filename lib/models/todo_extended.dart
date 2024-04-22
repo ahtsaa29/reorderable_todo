@@ -17,7 +17,7 @@ class TodoAdapter extends TypeAdapter<TodoModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return TodoModel(
-      key: fields[0] as Key,
+      key: fields[0] as String,
       index: fields[1] as int,
       title: fields[2] as String,
       detail: fields[3] as String,

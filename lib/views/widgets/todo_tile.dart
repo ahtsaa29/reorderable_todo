@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 import 'package:orderable_todo/models/status.dart';
 import 'package:orderable_todo/models/todo_model.dart';
 import 'package:orderable_todo/views/pages/todo_view.dart';
 
+// ignore: must_be_immutable
 class ToDoTile extends StatelessWidget {
+  Box<TodoModel> box;
+
   final TodoModel? todo;
 
-  const ToDoTile({
+  ToDoTile({
+    required this.box,
     super.key,
     required this.todo,
   });
@@ -19,9 +25,11 @@ class ToDoTile extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => TodoView(
+                    box: box,
                     todo: TodoModel(
-                        key: key!,
+                        key: key.toString(),
                         dueDate: todo!.dueDate,
+                        detail: todo!.detail,
                         title: todo!.title,
                         status: todo!.status,
                         createdAt: todo!.createdAt,
@@ -38,12 +46,12 @@ class ToDoTile extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                    "Due Date: ${todo!.dueDate.year}-${todo!.dueDate.month}-${todo!.dueDate.day}"),
+                    "Due Date: ${DateFormat('yyyy-MM-dd').format(todo!.dueDate)}"),
                 SizedBox(
                     width: MediaQuery.of(context).size.width * 0.3,
                     child: Text(
                         // ignore: unrelated_type_equality_checks
-                        "Status: ${todo!.status == status.completed ? "Complete" : todo!.status == status.inProgress ? "In Progress" : "uncompleted"}")),
+                        "Status: ${todo!.status == status.completed.toString() ? "Complete" : todo!.status == status.inProgress.toString() ? "In Progress" : "Uncompleted"}")),
               ],
             ),
           ),

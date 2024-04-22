@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:uuid/uuid.dart';
 import 'package:xid/xid.dart';
 
 part 'todo_extended.dart';
@@ -9,13 +7,13 @@ part 'todo_extended.dart';
 class TodoModel extends HiveObject {
   @override
   @HiveField(0)
-  Key key;
+  String key;
   @HiveField(1)
   int index;
   @HiveField(2)
   String title;
   @HiveField(3)
-  String? detail;
+  String detail;
   @HiveField(4)
   DateTime dueDate;
   @HiveField(5)
@@ -30,22 +28,25 @@ class TodoModel extends HiveObject {
     required this.createdAt,
     required this.status,
     required this.key,
-    this.detail,
+    required this.detail,
   });
   factory TodoModel.create({
-    required String? title,
-    required String? detail,
+    required int index,
+    required String title,
+    required String detail,
     required String? status,
     DateTime? createdAt,
     DateTime? dueDate,
-  }) =>
-      TodoModel(
-        index: int.parse(const Uuid().v1()),
-        title: title ?? "",
-        detail: detail ?? "",
-        createdAt: createdAt ?? DateTime.now(),
-        status: status.toString(),
-        dueDate: dueDate ?? DateTime.now(),
-        key: Key(Xid().toString()),
-      );
+  }) {
+    // final int index = _currentIndex++;
+    return TodoModel(
+      index: index,
+      title: title,
+      detail: detail,
+      createdAt: createdAt ?? DateTime.now(),
+      status: status ?? "",
+      dueDate: dueDate ?? DateTime.now(),
+      key: Xid().toString(),
+    );
+  }
 }

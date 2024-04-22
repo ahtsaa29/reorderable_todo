@@ -1,12 +1,21 @@
 // ignore_for_file: unrelated_type_equality_checks, duplicate_ignore
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
+import 'package:orderable_todo/main.dart';
 import 'package:orderable_todo/models/status.dart';
 import 'package:orderable_todo/models/todo_model.dart';
+import 'package:orderable_todo/views/pages/add_todo.dart';
 
+// ignore: must_be_immutable
 class TodoView extends StatelessWidget {
+  Box<TodoModel> box;
+
   final TodoModel todo;
-  const TodoView({super.key, required this.todo});
+  TodoView({super.key, required this.box, required this.todo});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +30,14 @@ class TodoView extends StatelessWidget {
         ),
         actions: [
           IconButton(
-              onPressed: () {},
+              onPressed: () async {
+                log("delete");
+                await BaseWidget.of(context).dataStore.deleteTodo(todo: todo);
+                // ignore: use_build_context_synchronously
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Todo Deleted Successfully")));
+              },
               icon: const Icon(
                 Icons.delete,
                 color: Colors.white,
@@ -49,7 +65,7 @@ class TodoView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                        "Due Date: ${todo.dueDate.year}-${todo.dueDate.month}-${todo.dueDate.day}"),
+                        "Due Date: ${DateFormat('yyyy-MM-dd').format(todo.dueDate)}"),
                     Container(
                         decoration: BoxDecoration(
                             color: Colors.grey[400],
@@ -81,7 +97,14 @@ class TodoView extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                                  builder: (context) => AddToDo(
+                                        box: box,
+                                        todo: todo,
+                                      )));
+                        },
                         icon: Icon(
                           Icons.edit,
                           color: Colors.deepPurple.shade300,
@@ -89,7 +112,7 @@ class TodoView extends StatelessWidget {
                   ],
                 ),
               ),
-              if (todo.detail != null) Text(todo.detail!),
+              Text(todo.detail),
             ],
           ),
         ),

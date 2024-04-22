@@ -1,16 +1,19 @@
 // ignore_for_file: unused_local_variable
 
+import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:orderable_todo/data_store/data_store.dart';
+import 'package:orderable_todo/main.dart';
 import 'package:orderable_todo/models/status.dart';
 import 'package:orderable_todo/models/todo_model.dart';
-import 'package:xid/xid.dart';
 
 // ignore: must_be_immutable
 class AddToDo extends StatefulWidget {
+  Box<TodoModel> box;
   final TodoModel? todo;
-  const AddToDo({
+  AddToDo({
+    required this.box,
     super.key,
     this.todo,
   });
@@ -27,9 +30,12 @@ class _AddToDoState extends State<AddToDo> {
 
   @override
   void initState() {
-    // selectedDate = widget.todo ?? DateTime.now();
     if (widget.todo != null) {
+      log("not null");
       selectedDate = widget.todo!.dueDate;
+      log(selectedDate.toString());
+      titleController!.text = widget.todo!.title;
+      detailController!.text = widget.todo!.detail;
     } else {
       selectedDate = DateTime.now();
     }
@@ -37,14 +43,14 @@ class _AddToDoState extends State<AddToDo> {
   }
 
   String showDate(DateTime? date) {
-    if (widget.todo?.createdAt == null) {
+    if (widget.todo?.dueDate == null) {
       if (date == null) {
         return DateFormat.yMMMEd().format(DateTime.now()).toString();
       } else {
         return DateFormat.yMMMEd().format(date).toString();
       }
     } else {
-      return DateFormat.yMMMEd().format(widget.todo!.createdAt).toString();
+      return DateFormat.yMMMEd().format(widget.todo!.dueDate).toString();
     }
   }
 
@@ -171,6 +177,7 @@ class _AddToDoState extends State<AddToDo> {
                 );
                 setState(() {
                   date = selectedDate;
+                  widget.todo!.dueDate = selectedDate!;
                 });
               },
               child: Container(
@@ -201,7 +208,9 @@ class _AddToDoState extends State<AddToDo> {
                           color: Colors.grey.shade100),
                       child: Center(
                         child: Text(
-                          showDate(selectedDate),
+                          showDate(widget.todo != null
+                              ? widget.todo!.dueDate
+                              : selectedDate),
                           style: textTheme.titleSmall,
                         ),
                       ),
@@ -210,24 +219,102 @@ class _AddToDoState extends State<AddToDo> {
                 ),
               ),
             ),
+            if (widget.todo != null)
+              GestureDetector(
+                onTap: () async {
+                  selectedDate = await showDatePicker(
+                    initialDate: selectedDate,
+                    context: context,
+                    firstDate: DateTime(2024),
+                    lastDate: DateTime(2025),
+                  );
+                  setState(() {
+                    date = selectedDate;
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                  width: double.infinity,
+                  height: 55,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey.shade300, width: 1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Text(
+                          "Status",
+                          style: textTheme.bodyMedium,
+                        ),
+                      ),
+                      Expanded(child: Container()),
+                      DropdownButton<status>(
+                        value: status.values.firstWhere(
+                          (value) => value.toString() == widget.todo!.status,
+                          orElse: () => status.inProgress,
+                        ),
+                        items: status.values.map((status value) {
+                          return DropdownMenuItem<status>(
+                            value: value,
+                            child: Text(value
+                                .toString()
+                                .split('.')
+                                .last), // Convert enum value to string
+                          );
+                        }).toList(),
+                        onChanged: (status? newValue) {
+                          setState(() {
+                            widget.todo!.status =
+                                newValue!.toString(); // Update selected status
+                          });
+                        },
+                      )
+                    ],
+                  ),
+                ),
+              ),
             ElevatedButton(
                 onPressed: () {
-                  // DataStore().addItem(
-                  TodoModel todo = TodoModel(
-                    index: DataStore().items.length + 1,
-                    title: titleController!.text,
-                    detail: detailController!.text,
-                    dueDate: selectedDate!,
-                    createdAt: DateTime.now(),
-                    status: status.inProgress.toString(),
-                    key: Key(Xid().toString()),
-                  );
-                  todo.save();
-                  // );
-
-                  // log(DataStore().items.length.toString());
+                  if (widget.todo == null) {
+                    int index = widget.box.length;
+                    log("index :: $index");
+                    if (titleController!.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text("Please Provide a Title")));
+                    } else if (detailController!.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text("Please Provide a detail")));
+                    } else {
+                      TodoModel todo = TodoModel.create(
+                        index: index++,
+                        title: titleController!.text,
+                        detail: detailController!.text,
+                        dueDate: selectedDate!,
+                        status: status.uncompleted.toString(),
+                      );
+                      BaseWidget.of(context).dataStore.addTodo(todo: todo);
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text("Todo Added Successfully")));
+                    }
+                  } else {
+                    TodoModel todo = TodoModel.create(
+                      index: widget.todo!.index,
+                      title: titleController!.text,
+                      detail: detailController!.text,
+                      dueDate: selectedDate!,
+                      status: widget.todo!.status,
+                    );
+                    BaseWidget.of(context).dataStore.updateTodo(todo: todo);
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Todo Updated Successfully")));
+                  }
                 },
-                child: const Text("Save"))
+                child: Text(widget.todo != null ? "Update" : "Save"))
           ],
         ),
       ),
