@@ -1,6 +1,5 @@
 // ignore_for_file: unused_local_variable
 
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -8,11 +7,10 @@ import 'package:orderable_todo/main.dart';
 import 'package:orderable_todo/models/status.dart';
 import 'package:orderable_todo/models/todo_model.dart';
 
-// ignore: must_be_immutable
 class AddToDo extends StatefulWidget {
-  Box<TodoModel> box;
+  final Box<TodoModel> box;
   final TodoModel? todo;
-  AddToDo({
+  const AddToDo({
     required this.box,
     super.key,
     this.todo,
@@ -31,9 +29,7 @@ class _AddToDoState extends State<AddToDo> {
   @override
   void initState() {
     if (widget.todo != null) {
-      log("not null");
       selectedDate = widget.todo!.dueDate;
-      log(selectedDate.toString());
       titleController!.text = widget.todo!.title;
       detailController!.text = widget.todo!.detail;
     } else {
@@ -98,226 +94,263 @@ class _AddToDoState extends State<AddToDo> {
     String? title;
     String? subtitle;
     DateTime? date;
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.deepPurple.shade300,
-        title: const Text(
-          "Add To DO",
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-      body: SizedBox(
-        height: double.infinity,
-        width: double.infinity,
-        child: Column(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListTile(
-                title: TextFormField(
-                  controller: titleController,
-                  maxLines: 3,
-                  cursorHeight: 20,
-                  style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    hintText: "Title",
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                  ),
-                  onFieldSubmitted: (value) {
-                    title = value;
-                    FocusManager.instance.primaryFocus?.unfocus();
-                  },
-                  onChanged: (value) {
-                    title = value;
-                  },
+    return SafeArea(
+      child: ValueListenableBuilder(
+          valueListenable: Hive.box('settings').listenable(),
+          builder: (context, box, child) {
+            final isDark = box.get('isDark', defaultValue: false);
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor:
+                    isDark ? Colors.deepPurple : Colors.deepPurple.shade300,
+                title: const Text(
+                  "Add To DO",
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
-            ),
-
-            const SizedBox(
-              height: 10,
-            ),
-
-            Container(
-              width: MediaQuery.of(context).size.width,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListTile(
-                title: TextFormField(
-                  controller: detailController,
-                  style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    counter: Container(),
-                    hintText: "Add Note",
-                  ),
-                  onFieldSubmitted: (value) {
-                    subtitle = value;
-                  },
-                  onChanged: (value) {
-                    subtitle = value;
-                  },
-                ),
-              ),
-            ),
-
-            /// Time Picker
-            GestureDetector(
-              onTap: () async {
-                selectedDate = await showDatePicker(
-                  initialDate: selectedDate,
-                  context: context,
-                  firstDate: DateTime(2024),
-                  lastDate: DateTime(2025),
-                );
-                setState(() {
-                  date = selectedDate;
-                  widget.todo!.dueDate = selectedDate!;
-                });
-              },
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+              body: SizedBox(
+                height: double.infinity,
                 width: double.infinity,
-                height: 55,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey.shade300, width: 1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
+                child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Text(
-                        "Due Date",
-                        style: textTheme.bodyMedium,
-                      ),
-                    ),
-                    Expanded(child: Container()),
                     Container(
-                      margin: const EdgeInsets.only(right: 10),
-                      width: 150,
-                      height: 35,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.grey.shade100),
-                      child: Center(
-                        child: Text(
-                          showDate(widget.todo != null
-                              ? widget.todo!.dueDate
-                              : selectedDate),
-                          style: textTheme.titleSmall,
+                      width: MediaQuery.of(context).size.width,
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ListTile(
+                        title: TextFormField(
+                          controller: titleController,
+                          maxLines: 3,
+                          cursorHeight: 20,
+                          style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black),
+                          decoration: InputDecoration(
+                            hintText: "Title",
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey.shade300),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey.shade300),
+                            ),
+                          ),
+                          onFieldSubmitted: (value) {
+                            title = value;
+                            FocusManager.instance.primaryFocus?.unfocus();
+                          },
+                          onChanged: (value) {
+                            title = value;
+                          },
                         ),
                       ),
                     ),
+
+                    const SizedBox(
+                      height: 10,
+                    ),
+
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ListTile(
+                        title: TextFormField(
+                          controller: detailController,
+                          style: const TextStyle(color: Colors.black),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            counter: Container(),
+                            hintText: "Add Note",
+                          ),
+                          onFieldSubmitted: (value) {
+                            subtitle = value;
+                          },
+                          onChanged: (value) {
+                            subtitle = value;
+                          },
+                        ),
+                      ),
+                    ),
+
+                    /// Time Picker
+                    GestureDetector(
+                      onTap: () async {
+                        selectedDate = await showDatePicker(
+                          initialDate: selectedDate,
+                          context: context,
+                          firstDate: DateTime(2024),
+                          lastDate: DateTime(2025),
+                        );
+                        setState(() {
+                          date = selectedDate;
+                          widget.todo!.dueDate = selectedDate!;
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                        width: double.infinity,
+                        height: 55,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.deepPurple : Colors.white,
+                          border:
+                              Border.all(color: Colors.grey.shade300, width: 1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Text(
+                                "Due Date",
+                                style: textTheme.bodyMedium,
+                              ),
+                            ),
+                            Expanded(child: Container()),
+                            Container(
+                              margin: const EdgeInsets.only(right: 10),
+                              width: 150,
+                              height: 35,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: isDark
+                                    ? Colors.deepPurple[300]
+                                    : Colors.grey.shade100,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  showDate(widget.todo != null
+                                      ? widget.todo!.dueDate
+                                      : selectedDate),
+                                  style: textTheme.titleSmall,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (widget.todo != null)
+                      GestureDetector(
+                        onTap: () async {
+                          selectedDate = await showDatePicker(
+                            initialDate: selectedDate,
+                            context: context,
+                            firstDate: DateTime(2024),
+                            lastDate: DateTime(2025),
+                          );
+                          setState(() {
+                            date = selectedDate;
+                          });
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                          width: double.infinity,
+                          height: 55,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(
+                                color: Colors.grey.shade300, width: 1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 10),
+                                child: Text(
+                                  "Status",
+                                  style: textTheme.bodyMedium,
+                                ),
+                              ),
+                              Expanded(child: Container()),
+                              DropdownButton<status>(
+                                value: status.values.firstWhere(
+                                  (value) =>
+                                      value.toString() == widget.todo!.status,
+                                  orElse: () => status.inProgress,
+                                ),
+                                items: status.values.map((status value) {
+                                  return DropdownMenuItem<status>(
+                                    value: value,
+                                    child: Text(value
+                                        .toString()
+                                        .split('.')
+                                        .last), // Convert enum value to string
+                                  );
+                                }).toList(),
+                                onChanged: (status? newValue) {
+                                  setState(() {
+                                    widget.todo!.status = newValue!
+                                        .toString(); // Update selected status
+                                  });
+                                },
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    SizedBox(
+                      width: 100,
+                      child: ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.deepPurple)),
+                          onPressed: () {
+                            if (widget.todo == null) {
+                              int index = widget.box.length;
+                              if (titleController!.text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content:
+                                            Text("Please Provide a Title")));
+                              } else if (detailController!.text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content:
+                                            Text("Please Provide a detail")));
+                              } else {
+                                TodoModel todo = TodoModel.create(
+                                  index: index++,
+                                  title: titleController!.text,
+                                  detail: detailController!.text,
+                                  dueDate: selectedDate!,
+                                  status: status.uncompleted.toString(),
+                                );
+                                BaseWidget.of(context)
+                                    .dataStore
+                                    .addTodo(todo: todo);
+                                Navigator.of(context).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content:
+                                            Text("Todo Added Successfully")));
+                              }
+                            } else {
+                              TodoModel todo = TodoModel.create(
+                                index: widget.todo!.index,
+                                title: titleController!.text,
+                                detail: detailController!.text,
+                                dueDate: selectedDate!,
+                                status: widget.todo!.status,
+                              );
+                              BaseWidget.of(context)
+                                  .dataStore
+                                  .updateTodo(todo: todo);
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text("Todo Updated Successfully")));
+                            }
+                          },
+                          child: Text(
+                            widget.todo != null ? "Update" : "Save",
+                            style: const TextStyle(color: Colors.white),
+                          )),
+                    )
                   ],
                 ),
               ),
-            ),
-            if (widget.todo != null)
-              GestureDetector(
-                onTap: () async {
-                  selectedDate = await showDatePicker(
-                    initialDate: selectedDate,
-                    context: context,
-                    firstDate: DateTime(2024),
-                    lastDate: DateTime(2025),
-                  );
-                  setState(() {
-                    date = selectedDate;
-                  });
-                },
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                  width: double.infinity,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.grey.shade300, width: 1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: Text(
-                          "Status",
-                          style: textTheme.bodyMedium,
-                        ),
-                      ),
-                      Expanded(child: Container()),
-                      DropdownButton<status>(
-                        value: status.values.firstWhere(
-                          (value) => value.toString() == widget.todo!.status,
-                          orElse: () => status.inProgress,
-                        ),
-                        items: status.values.map((status value) {
-                          return DropdownMenuItem<status>(
-                            value: value,
-                            child: Text(value
-                                .toString()
-                                .split('.')
-                                .last), // Convert enum value to string
-                          );
-                        }).toList(),
-                        onChanged: (status? newValue) {
-                          setState(() {
-                            widget.todo!.status =
-                                newValue!.toString(); // Update selected status
-                          });
-                        },
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ElevatedButton(
-                onPressed: () {
-                  if (widget.todo == null) {
-                    int index = widget.box.length;
-                    log("index :: $index");
-                    if (titleController!.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text("Please Provide a Title")));
-                    } else if (detailController!.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text("Please Provide a detail")));
-                    } else {
-                      TodoModel todo = TodoModel.create(
-                        index: index++,
-                        title: titleController!.text,
-                        detail: detailController!.text,
-                        dueDate: selectedDate!,
-                        status: status.uncompleted.toString(),
-                      );
-                      BaseWidget.of(context).dataStore.addTodo(todo: todo);
-                      Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text("Todo Added Successfully")));
-                    }
-                  } else {
-                    TodoModel todo = TodoModel.create(
-                      index: widget.todo!.index,
-                      title: titleController!.text,
-                      detail: detailController!.text,
-                      dueDate: selectedDate!,
-                      status: widget.todo!.status,
-                    );
-                    BaseWidget.of(context).dataStore.updateTodo(todo: todo);
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text("Todo Updated Successfully")));
-                  }
-                },
-                child: Text(widget.todo != null ? "Update" : "Save"))
-          ],
-        ),
-      ),
+            );
+          }),
     );
   }
 }

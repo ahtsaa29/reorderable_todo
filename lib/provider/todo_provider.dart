@@ -5,13 +5,10 @@ import 'package:orderable_todo/models/status.dart';
 import 'package:orderable_todo/models/todo_model.dart';
 
 class TodoProvider with ChangeNotifier {
-  // Initialize an empty list of tasks
   final List<TodoModel> _todos = [];
 
-  // Get all the tasks as an UnmodifiableListView
   UnmodifiableListView<TodoModel> get allTasks => UnmodifiableListView(_todos);
 
-  // Add a new task
   void addToDo(
       int index, String taskTitle, String taskDetail, DateTime dueDate) {
     _todos.add(TodoModel.create(

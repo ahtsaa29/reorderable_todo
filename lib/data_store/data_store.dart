@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:orderable_todo/data_store/hive_store.dart';
@@ -17,6 +16,5 @@ class DataStore {
 
   void addItem(TodoModel item) {
     itemsNotifier.value = [...items, item];
-    log(itemsNotifier.value.length.toString());
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:orderable_todo/models/todo_model.dart';
@@ -25,18 +23,14 @@ class HiveDataStore {
       storedTodo.dueDate = todo.dueDate;
       storedTodo.status = todo.status;
       await storedTodo.save();
-    } else {
-      log('Todo not found in the box.');
-    }
+    } else {}
   }
 
   Future<void> deleteTodo({required TodoModel todo}) async {
     final storedTodo = box.get(todo.index);
     if (storedTodo != null) {
       await storedTodo.delete();
-    } else {
-      log('Todo not found in the box.');
-    }
+    } else {}
   }
 
   ValueListenable<Box<TodoModel>> listenToTodo() {
